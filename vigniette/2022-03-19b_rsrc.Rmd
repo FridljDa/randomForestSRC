@@ -1,0 +1,46 @@
+---
+title: "IHW simple Benchmark"
+output: html_document
+---
+
+
+Loading packages.
+```{r setup, message = F}
+library(magrittr)
+library(dplyr)
+library(ggplot2)
+knitr::opts_chunk$set(echo = TRUE)
+set.seed(1234)
+theme_set(theme_bw())
+```
+
+```{r}
+m <- 400
+#nfolds <- 3
+#folds <- sample(1:nfolds, m, replace = TRUE)
+
+cov1 <- runif(m, -1, 1)
+cov2 <- runif(m, -1, 1)
+prop_alt <- 1 / (1 + exp(-1 * (3 * cov1 + 2 * cov2 - 5)))
+pvalues <- ifelse(rbinom(m, size = 1, prop_alt),
+  rbeta(m, 0.25, 1),
+  runif(m)
+)
+covariates <- cbind(cov1, cov2)
+
+tau <- 0.5
+
+data <- data.frame(
+        indic = (pvalues >= tau) / (1 - tau),
+        covariates
+      )
+```
+
+```{r}
+#library(randomForestSRC)
+devtools::load_all()
+## motor trend cars
+mtcars.obj <- rfsrc(mpg ~ ., data = mtcars, splitrule = "custom")
+## iris analysis
+iris.obj <- rfsrc(Species ~., data = iris, splitrule = "custom1")
+```
